@@ -92,6 +92,9 @@ function makemat(rng::AbstractRNG, ::Type{T}, atype::BidiagonalArrayType, m::Int
 end
 isdense(::BidiagonalArrayType) = false
 istypestable(::BidiagonalArrayType) = false
+@static if VERSION < v"1.8"
+    hasinv(::BidiagonalArrayType) = false
+end
 hastypestableinv(::BidiagonalArrayType) = false
 
 # Tridiagonal
@@ -105,6 +108,9 @@ function makemat(rng::AbstractRNG, ::Type{T}, atype::TridiagonalArrayType, m::In
     return Tridiagonal(rand(rng, T, n - 1), rand(rng, T, n), rand(rng, T, n - 1))::mattype(atype)
 end
 isdense(::TridiagonalArrayType) = false
+@static if VERSION < v"1.8"
+    hasinv(::TridiagonalArrayType) = false
+end
 hastypestableinv(::TridiagonalArrayType) = false
 
 # Symmetric tridiagonal
@@ -118,6 +124,9 @@ function makemat(rng::AbstractRNG, ::Type{T}, atype::SymTridiagonalArrayType, m:
     return SymTridiagonal(rand(rng, T, n), rand(rng, T, n - 1))::mattype(atype)
 end
 isdense(::SymTridiagonalArrayType) = false
+@static if VERSION < v"1.8"
+    hasinv(::SymTridiagonalArrayType) = false
+end
 hastypestableinv(::SymTridiagonalArrayType) = false
 
 # Sparse
