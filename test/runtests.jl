@@ -126,10 +126,11 @@ Base.abs(x::GaussMod) = real(x) + imag(x)
 # TODO: Unitful (and think how to check or ignore units)
 
 const mod_prime = 10000000019
-const types = [BigRat,
-               Complex{BigRat},
-               Mod{mod_prime,Int64},
-               GaussMod{mod_prime,Int64}]
+#TODO const types = [BigRat,
+#TODO                Complex{BigRat},
+#TODO                Mod{mod_prime,Int64},
+#TODO                GaussMod{mod_prime,Int64}]
+const types = [BigRat]
 
 Random.seed!(0)
 const rng = Random.GLOBAL_RNG
@@ -262,7 +263,7 @@ const rng = Random.GLOBAL_RNG
         invR = inv(Array(R))
         invQR = inv(Array(Q * R))
     end
-    if hassolve(atype)
+    if !solveisbroken(atype)
         BoverQ = B / Q
         QunderB = Q \ B
         if hastypestablesolve(atype)
@@ -273,9 +274,6 @@ const rng = Random.GLOBAL_RNG
             @test QunderB isa AbstractMatrix{T}
         end
     else
-        # # Convert to a sparse matrix to solve
-        # BoverQ = B / sparse(Q)
-        # QunderB = sparse(Q) \ B
         # Convert to a dense matrix to solve
         BoverQ = B / Array(Q)
         QunderB = Array(Q) \ B
@@ -339,7 +337,8 @@ const rng = Random.GLOBAL_RNG
     @test dot(a * A, B) == conj(a) * dot(A, B)
     @test dot(A, B) == conj(dot(B, A))
 
-    if MT <: Bidiagonal || MT <: SymTridiagonal || MT <: Tridiagonal
+    if MT <: Bidiagonal || MT <: SymTridiagonal || MT <: Tridiagonal ||
+       (VERSION < v"1.7" && MT <: Diagonal{T,<:SparseVector{T}} where {T})
         @test !(kron(A, B) isa MT{T})
         @test kron(A, B) isa AbstractMatrix{T}
     else

@@ -7,7 +7,8 @@ using SparseArrays
 
 export ArrayType
 export vectype, mattype
-export isdense, istypestable, hastypestableinv, hastypestablesolve, hasinv, hassolve
+export isdense, istypestable, hasinv, hastypestableinv, hastypestablesolve
+export solveisbroken
 export makevec, makemat
 export arraytypes
 
@@ -19,10 +20,10 @@ vectype(::ArrayType{V,M}) where {V,M} = V
 mattype(::ArrayType{V,M}) where {V,M} = M
 isdense(::ArrayType) = true
 istypestable(::ArrayType) = true
+hasinv(::ArrayType) = true
 hastypestableinv(::ArrayType) = true
 hastypestablesolve(::ArrayType) = true
-hasinv(::ArrayType) = true
-hassolve(::ArrayType) = true
+solveisbroken(::ArrayType) = false
 
 const arraytypes = ArrayType[]
 
@@ -102,6 +103,9 @@ istypestable(::BidiagonalArrayType) = false
 end
 hastypestableinv(::BidiagonalArrayType) = false
 hastypestablesolve(::BidiagonalArrayType) = false
+@static if VERSION ≥ v"1.7" && VERSION < v"1.8"
+    solveisbroken(::BidiagonalArrayType) = true
+end
 
 # Tridiagonal
 
@@ -142,34 +146,43 @@ isdense(::SymTridiagonalArrayType) = false
 end
 hastypestableinv(::SymTridiagonalArrayType) = false
 hastypestablesolve(::SymTridiagonalArrayType) = false
+@static if VERSION ≥ v"1.7" && VERSION < v"1.8"
+    solveisbroken(::SymTridiagonalArrayType) = true
+end
 
 # Sparse
 
 const SparseArrayType = ArrayType{Vector,SparseMatrixCSC{T,Int} where {T}}
 const sparse = SparseArrayType("sparse")
-push!(arraytypes, sparse)
+# Sparse matrices have no working left-division
+@static if VERSION ≥ v"1.7"
+    push!(arraytypes, sparse)
+end
 
 makevec(rng::AbstractRNG, ::Type{T}, atype::SparseArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
 makemat(rng::AbstractRNG, ::Type{T}, atype::SparseArrayType, m::Int, n::Int) where {T} = sprand(rng, T, m, n, 0.1)::mattype(atype)
 isdense(::SparseArrayType) = false
-hastypestablesolve(::SparseArrayType) = false
 hasinv(::SparseArrayType) = false
+hastypestablesolve(::SparseArrayType) = false
 # The sparse matrix solver only supports C types
-hassolve(::SparseArrayType) = false
+solveisbroken(::SparseArrayType) = true
 
 # Sparse matrices and vectors
 
 const SparseMVArrayType = ArrayType{SparseVector{T,Int} where {T},SparseMatrixCSC{T,Int} where {T}}
 const sparsemv = SparseMVArrayType("sparse matrices and vectors")
-push!(arraytypes, sparsemv)
+# Sparse matrices have no working left-division
+@static if VERSION ≥ v"1.7"
+    push!(arraytypes, sparsemv)
+end
 
 makevec(rng::AbstractRNG, ::Type{T}, atype::SparseMVArrayType, n::Int) where {T} = sprand(rng, T, n, 0.5)::vectype(atype)
 makemat(rng::AbstractRNG, ::Type{T}, atype::SparseMVArrayType, m::Int, n::Int) where {T} = sprand(rng, T, m, n, 0.1)::mattype(atype)
 isdense(::SparseMVArrayType) = false
-hastypestablesolve(::SparseMVArrayType) = false
 hasinv(::SparseMVArrayType) = false
+hastypestablesolve(::SparseMVArrayType) = false
 # The sparse matrix solver only supports C types
-hassolve(::SparseMVArrayType) = false
+solveisbroken(::SparseMVArrayType) = true
 
 # Sparse diagonals
 
