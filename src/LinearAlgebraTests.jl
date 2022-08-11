@@ -131,7 +131,7 @@ hastypestableinv(::SymTridiagonalArrayType) = false
 
 # Sparse
 
-const SparseArrayType = ArrayType{Vector,SparseMatrixCSC{T,Int64} where {T}}
+const SparseArrayType = ArrayType{Vector,SparseMatrixCSC{T,Int} where {T}}
 const sparse = SparseArrayType("sparse")
 push!(arraytypes, sparse)
 
@@ -142,7 +142,7 @@ hasinv(::SparseArrayType) = false
 
 # Sparse matrices and vectors
 
-const SparseMVArrayType = ArrayType{SparseVector{T,Int64} where {T},SparseMatrixCSC{T,Int64} where {T}}
+const SparseMVArrayType = ArrayType{SparseVector{T,Int} where {T},SparseMatrixCSC{T,Int} where {T}}
 const sparsemv = SparseMVArrayType("sparse matrices and vectors")
 push!(arraytypes, sparsemv)
 
@@ -153,7 +153,7 @@ hasinv(::SparseMVArrayType) = false
 
 # Sparse diagonals
 
-const SparseDiagonalArrayType = ArrayType{SparseVector{T,Int64} where {T},Diagonal{T,SparseVector{T,Int64}} where {T}}
+const SparseDiagonalArrayType = ArrayType{SparseVector{T,Int} where {T},Diagonal{T,SparseVector{T,Int}} where {T}}
 const sparse_diagonal = SparseDiagonalArrayType("sparse diagonal")
 push!(arraytypes, sparse_diagonal)
 
