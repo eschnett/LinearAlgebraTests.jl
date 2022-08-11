@@ -128,8 +128,8 @@ Base.abs(x::GaussMod) = real(x) + imag(x)
 const mod_prime = 10000000019
 const types = [BigRat,
                Complex{BigRat},
-               Mod{mod_prime,Int},
-               GaussMod{mod_prime,Int}]
+               Mod{mod_prime,Int64},
+               GaussMod{mod_prime,Int64}]
 
 Random.seed!(0)
 const rng = Random.GLOBAL_RNG
