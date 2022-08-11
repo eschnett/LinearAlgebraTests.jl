@@ -233,8 +233,6 @@ const rng = Random.GLOBAL_RNG
     @test (A * B) * x == A * (B * x)
 
     q = a + 2
-    # @show a
-    # @show q
     invq = inv(q)
     @test invq * (q * x) == x
 
@@ -243,19 +241,7 @@ const rng = Random.GLOBAL_RNG
     test_mattype(Q)
     test_mattype(R)
     if hasinv(atype)
-        # @show typeof(E) size(E) E
-        # @show typeof(A) size(A) A
-        # @show typeof(Q) size(Q) Q
-        # @show typeof(B) size(B) B
-        # @show typeof(R) size(R) R
-        try
-            invQ = inv(Q)
-        catch ex
-            @show typeof(Q)
-            @show size(Q)
-            @show Q
-            throw(ex)
-        end
+        invQ = inv(Q)
         invR = inv(R)
         invQR = inv(Q * R)
         if hastypestableinv(atype)
@@ -263,13 +249,23 @@ const rng = Random.GLOBAL_RNG
             @test invR isa MT{T}
             @test invQR isa MT{T}
         else
+            @test !(invQ isa MT{T})
+            @test !(invR isa MT{T})
+            @test !(invQR isa MT{T})
             @test invQ isa AbstractMatrix{T}
             @test invR isa AbstractMatrix{T}
             @test invQR isa AbstractMatrix{T}
         end
+    else
+        # Convert to a dense matrix to invert
+        invQ = inv(Array(Q))
+        invR = inv(Array(R))
+        invQR = inv(Array(Q * R))
+    end
+    if hassolve(atype)
         BoverQ = B / Q
         QunderB = Q \ B
-        if hastypestableinv(atype)
+        if hastypestablesolve(atype)
             @test BoverQ isa MT{T}
             @test QunderB isa MT{T}
         else
@@ -277,9 +273,10 @@ const rng = Random.GLOBAL_RNG
             @test QunderB isa AbstractMatrix{T}
         end
     else
-        invQ = inv(Array(Q))
-        invR = inv(Array(R))
-        invQR = inv(Array(Q * R))
+        # # Convert to a sparse matrix to solve
+        # BoverQ = B / sparse(Q)
+        # QunderB = sparse(Q) \ B
+        # Convert to a dense matrix to solve
         BoverQ = B / Array(Q)
         QunderB = Array(Q) \ B
     end
@@ -343,6 +340,7 @@ const rng = Random.GLOBAL_RNG
     @test dot(A, B) == conj(dot(B, A))
 
     if MT <: Bidiagonal || MT <: SymTridiagonal || MT <: Tridiagonal
+        @test !(kron(A, B) isa MT{T})
         @test kron(A, B) isa AbstractMatrix{T}
     else
         @test kron(A, B) isa MT{T}

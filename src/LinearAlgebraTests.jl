@@ -7,7 +7,7 @@ using SparseArrays
 
 export ArrayType
 export vectype, mattype
-export isdense, istypestable, hastypestableinv, hasinv
+export isdense, istypestable, hastypestableinv, hastypestablesolve, hasinv, hassolve
 export makevec, makemat
 export arraytypes
 
@@ -20,7 +20,9 @@ mattype(::ArrayType{V,M}) where {V,M} = M
 isdense(::ArrayType) = true
 istypestable(::ArrayType) = true
 hastypestableinv(::ArrayType) = true
+hastypestablesolve(::ArrayType) = true
 hasinv(::ArrayType) = true
+hassolve(::ArrayType) = true
 
 const arraytypes = ArrayType[]
 
@@ -84,7 +86,10 @@ isdense(::DiagonalArrayType) = false
 
 const BidiagonalArrayType = ArrayType{Vector,Bidiagonal{T,Vector{T}} where {T}}
 const bidiagonal = BidiagonalArrayType("bidiagonal")
-push!(arraytypes, bidiagonal)
+# https://github.com/JuliaLang/julia/issues/46321
+@static if VERSION ≥ v"1.7"
+    push!(arraytypes, bidiagonal)
+end
 
 makevec(rng::AbstractRNG, ::Type{T}, atype::BidiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
 function makemat(rng::AbstractRNG, ::Type{T}, atype::BidiagonalArrayType, m::Int, n::Int) where {T}
@@ -96,12 +101,16 @@ istypestable(::BidiagonalArrayType) = false
     hasinv(::BidiagonalArrayType) = false
 end
 hastypestableinv(::BidiagonalArrayType) = false
+hastypestablesolve(::BidiagonalArrayType) = false
 
 # Tridiagonal
 
 const TridiagonalArrayType = ArrayType{Vector,Tridiagonal{T,Vector{T}} where {T}}
 const tridiagonal = TridiagonalArrayType("tridiagonal")
-push!(arraytypes, tridiagonal)
+# Tridiagonal matrices have no working left-division
+@static if VERSION ≥ v"1.7"
+    push!(arraytypes, tridiagonal)
+end
 
 makevec(rng::AbstractRNG, ::Type{T}, atype::TridiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
 function makemat(rng::AbstractRNG, ::Type{T}, atype::TridiagonalArrayType, m::Int, n::Int) where {T}
@@ -112,12 +121,16 @@ isdense(::TridiagonalArrayType) = false
     hasinv(::TridiagonalArrayType) = false
 end
 hastypestableinv(::TridiagonalArrayType) = false
+hastypestablesolve(::TridiagonalArrayType) = false
 
 # Symmetric tridiagonal
 
 const SymTridiagonalArrayType = ArrayType{Vector,SymTridiagonal{T,Vector{T}} where {T}}
 const symtridiagonal = SymTridiagonalArrayType("symmetric tridiagonal")
-push!(arraytypes, symtridiagonal)
+# SymTridiagonal matrices have no working left-division
+@static if VERSION ≥ v"1.7"
+    push!(arraytypes, symtridiagonal)
+end
 
 makevec(rng::AbstractRNG, ::Type{T}, atype::SymTridiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
 function makemat(rng::AbstractRNG, ::Type{T}, atype::SymTridiagonalArrayType, m::Int, n::Int) where {T}
@@ -128,6 +141,7 @@ isdense(::SymTridiagonalArrayType) = false
     hasinv(::SymTridiagonalArrayType) = false
 end
 hastypestableinv(::SymTridiagonalArrayType) = false
+hastypestablesolve(::SymTridiagonalArrayType) = false
 
 # Sparse
 
@@ -138,7 +152,10 @@ push!(arraytypes, sparse)
 makevec(rng::AbstractRNG, ::Type{T}, atype::SparseArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
 makemat(rng::AbstractRNG, ::Type{T}, atype::SparseArrayType, m::Int, n::Int) where {T} = sprand(rng, T, m, n, 0.1)::mattype(atype)
 isdense(::SparseArrayType) = false
+hastypestablesolve(::SparseArrayType) = false
 hasinv(::SparseArrayType) = false
+# The sparse matrix solver only supports C types
+hassolve(::SparseArrayType) = false
 
 # Sparse matrices and vectors
 
@@ -149,7 +166,10 @@ push!(arraytypes, sparsemv)
 makevec(rng::AbstractRNG, ::Type{T}, atype::SparseMVArrayType, n::Int) where {T} = sprand(rng, T, n, 0.5)::vectype(atype)
 makemat(rng::AbstractRNG, ::Type{T}, atype::SparseMVArrayType, m::Int, n::Int) where {T} = sprand(rng, T, m, n, 0.1)::mattype(atype)
 isdense(::SparseMVArrayType) = false
+hastypestablesolve(::SparseMVArrayType) = false
 hasinv(::SparseMVArrayType) = false
+# The sparse matrix solver only supports C types
+hassolve(::SparseMVArrayType) = false
 
 # Sparse diagonals
 
