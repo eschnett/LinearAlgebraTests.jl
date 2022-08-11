@@ -126,11 +126,10 @@ Base.abs(x::GaussMod) = real(x) + imag(x)
 # TODO: Unitful (and think how to check or ignore units)
 
 const mod_prime = 10000000019
-#TODO const types = [BigRat,
-#TODO                Complex{BigRat},
-#TODO                Mod{mod_prime,Int64},
-#TODO                GaussMod{mod_prime,Int64}]
-const types = [BigRat]
+const types = [BigRat,
+               Complex{BigRat},
+               Mod{mod_prime,Int64},
+               GaussMod{mod_prime,Int64}]
 
 Random.seed!(0)
 const rng = Random.GLOBAL_RNG
@@ -274,6 +273,8 @@ const rng = Random.GLOBAL_RNG
             @test QunderB isa AbstractMatrix{T}
         end
     else
+        @test_broken B / Q
+        @test_broken Q \ B
         # Convert to a dense matrix to solve
         BoverQ = B / Array(Q)
         QunderB = Array(Q) \ B

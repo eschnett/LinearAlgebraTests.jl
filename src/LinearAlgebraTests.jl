@@ -84,105 +84,108 @@ makemat(rng::AbstractRNG, ::Type{T}, atype::DiagonalArrayType, m::Int, n::Int) w
 isdense(::DiagonalArrayType) = false
 
 # Bidiagonal
-
-const BidiagonalArrayType = ArrayType{Vector,Bidiagonal{T,Vector{T}} where {T}}
-const bidiagonal = BidiagonalArrayType("bidiagonal")
 # https://github.com/JuliaLang/julia/issues/46321
 @static if VERSION ≥ v"1.7"
+    const BidiagonalArrayType = ArrayType{Vector,Bidiagonal{T,Vector{T}} where {T}}
+    const bidiagonal = BidiagonalArrayType("bidiagonal")
     push!(arraytypes, bidiagonal)
-end
 
-makevec(rng::AbstractRNG, ::Type{T}, atype::BidiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
-function makemat(rng::AbstractRNG, ::Type{T}, atype::BidiagonalArrayType, m::Int, n::Int) where {T}
-    return Bidiagonal(rand(rng, T, n), rand(rng, T, n - 1), rand(rng, Bool) ? :U : :L)::mattype(atype)
-end
-isdense(::BidiagonalArrayType) = false
-istypestable(::BidiagonalArrayType) = false
-@static if VERSION < v"1.8"
-    hasinv(::BidiagonalArrayType) = false
-end
-hastypestableinv(::BidiagonalArrayType) = false
-hastypestablesolve(::BidiagonalArrayType) = false
-@static if VERSION ≥ v"1.7" && VERSION < v"1.8"
-    solveisbroken(::BidiagonalArrayType) = true
+    makevec(rng::AbstractRNG, ::Type{T}, atype::BidiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
+    function makemat(rng::AbstractRNG, ::Type{T}, atype::BidiagonalArrayType, m::Int, n::Int) where {T}
+        return Bidiagonal(rand(rng, T, n), rand(rng, T, n - 1), rand(rng, Bool) ? :U : :L)::mattype(atype)
+    end
+    isdense(::BidiagonalArrayType) = false
+    istypestable(::BidiagonalArrayType) = false
+    @static if VERSION < v"1.8"
+        hasinv(::BidiagonalArrayType) = false
+    end
+    hastypestableinv(::BidiagonalArrayType) = false
+    hastypestablesolve(::BidiagonalArrayType) = false
+    @static if VERSION < v"1.8"
+        solveisbroken(::BidiagonalArrayType) = true
+    end
 end
 
 # Tridiagonal
 
-const TridiagonalArrayType = ArrayType{Vector,Tridiagonal{T,Vector{T}} where {T}}
-const tridiagonal = TridiagonalArrayType("tridiagonal")
-# Tridiagonal matrices have no working left-division
+# https://github.com/JuliaLang/julia/issues/46321
 @static if VERSION ≥ v"1.7"
+    const TridiagonalArrayType = ArrayType{Vector,Tridiagonal{T,Vector{T}} where {T}}
+    const tridiagonal = TridiagonalArrayType("tridiagonal")
     push!(arraytypes, tridiagonal)
-end
 
-makevec(rng::AbstractRNG, ::Type{T}, atype::TridiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
-function makemat(rng::AbstractRNG, ::Type{T}, atype::TridiagonalArrayType, m::Int, n::Int) where {T}
-    return Tridiagonal(rand(rng, T, n - 1), rand(rng, T, n), rand(rng, T, n - 1))::mattype(atype)
+    makevec(rng::AbstractRNG, ::Type{T}, atype::TridiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
+    function makemat(rng::AbstractRNG, ::Type{T}, atype::TridiagonalArrayType, m::Int, n::Int) where {T}
+        return Tridiagonal(rand(rng, T, n - 1), rand(rng, T, n), rand(rng, T, n - 1))::mattype(atype)
+    end
+    isdense(::TridiagonalArrayType) = false
+    @static if VERSION < v"1.8"
+        hasinv(::TridiagonalArrayType) = false
+    end
+    hastypestableinv(::TridiagonalArrayType) = false
+    hastypestablesolve(::TridiagonalArrayType) = false
 end
-isdense(::TridiagonalArrayType) = false
-@static if VERSION < v"1.8"
-    hasinv(::TridiagonalArrayType) = false
-end
-hastypestableinv(::TridiagonalArrayType) = false
-hastypestablesolve(::TridiagonalArrayType) = false
 
 # Symmetric tridiagonal
 
-const SymTridiagonalArrayType = ArrayType{Vector,SymTridiagonal{T,Vector{T}} where {T}}
-const symtridiagonal = SymTridiagonalArrayType("symmetric tridiagonal")
-# SymTridiagonal matrices have no working left-division
+# SymTridiagonal matrices have no left-division
 @static if VERSION ≥ v"1.7"
+    const SymTridiagonalArrayType = ArrayType{Vector,SymTridiagonal{T,Vector{T}} where {T}}
+    const symtridiagonal = SymTridiagonalArrayType("symmetric tridiagonal")
     push!(arraytypes, symtridiagonal)
-end
 
-makevec(rng::AbstractRNG, ::Type{T}, atype::SymTridiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
-function makemat(rng::AbstractRNG, ::Type{T}, atype::SymTridiagonalArrayType, m::Int, n::Int) where {T}
-    return SymTridiagonal(rand(rng, T, n), rand(rng, T, n - 1))::mattype(atype)
-end
-isdense(::SymTridiagonalArrayType) = false
-@static if VERSION < v"1.8"
-    hasinv(::SymTridiagonalArrayType) = false
-end
-hastypestableinv(::SymTridiagonalArrayType) = false
-hastypestablesolve(::SymTridiagonalArrayType) = false
-@static if VERSION ≥ v"1.7" && VERSION < v"1.8"
-    solveisbroken(::SymTridiagonalArrayType) = true
+    makevec(rng::AbstractRNG, ::Type{T}, atype::SymTridiagonalArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
+    function makemat(rng::AbstractRNG, ::Type{T}, atype::SymTridiagonalArrayType, m::Int, n::Int) where {T}
+        return SymTridiagonal(rand(rng, T, n), rand(rng, T, n - 1))::mattype(atype)
+    end
+    isdense(::SymTridiagonalArrayType) = false
+    @static if VERSION < v"1.8"
+        hasinv(::SymTridiagonalArrayType) = false
+    end
+    hastypestableinv(::SymTridiagonalArrayType) = false
+    hastypestablesolve(::SymTridiagonalArrayType) = false
+    @static if VERSION < v"1.8"
+        solveisbroken(::SymTridiagonalArrayType) = true
+    end
 end
 
 # Sparse
 
-const SparseArrayType = ArrayType{Vector,SparseMatrixCSC{T,Int} where {T}}
-const sparse = SparseArrayType("sparse")
 # Sparse matrices have no working left-division
 @static if VERSION ≥ v"1.7"
+    const SparseArrayType = ArrayType{Vector,SparseMatrixCSC{T,Int} where {T}}
+    const sparse = SparseArrayType("sparse")
     push!(arraytypes, sparse)
-end
 
-makevec(rng::AbstractRNG, ::Type{T}, atype::SparseArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
-makemat(rng::AbstractRNG, ::Type{T}, atype::SparseArrayType, m::Int, n::Int) where {T} = sprand(rng, T, m, n, 0.1)::mattype(atype)
-isdense(::SparseArrayType) = false
-hasinv(::SparseArrayType) = false
-hastypestablesolve(::SparseArrayType) = false
-# The sparse matrix solver only supports C types
-solveisbroken(::SparseArrayType) = true
+    makevec(rng::AbstractRNG, ::Type{T}, atype::SparseArrayType, n::Int) where {T} = rand(rng, T, n)::vectype(atype)
+    function makemat(rng::AbstractRNG, ::Type{T}, atype::SparseArrayType, m::Int, n::Int) where {T}
+        return sprand(rng, T, m, n, 0.1)::mattype(atype)
+    end
+    isdense(::SparseArrayType) = false
+    hasinv(::SparseArrayType) = false
+    hastypestablesolve(::SparseArrayType) = false
+    # The sparse matrix solver only supports C types
+    solveisbroken(::SparseArrayType) = true
+end
 
 # Sparse matrices and vectors
 
-const SparseMVArrayType = ArrayType{SparseVector{T,Int} where {T},SparseMatrixCSC{T,Int} where {T}}
-const sparsemv = SparseMVArrayType("sparse matrices and vectors")
 # Sparse matrices have no working left-division
 @static if VERSION ≥ v"1.7"
+    const SparseMVArrayType = ArrayType{SparseVector{T,Int} where {T},SparseMatrixCSC{T,Int} where {T}}
+    const sparsemv = SparseMVArrayType("sparse matrices and vectors")
     push!(arraytypes, sparsemv)
-end
 
-makevec(rng::AbstractRNG, ::Type{T}, atype::SparseMVArrayType, n::Int) where {T} = sprand(rng, T, n, 0.5)::vectype(atype)
-makemat(rng::AbstractRNG, ::Type{T}, atype::SparseMVArrayType, m::Int, n::Int) where {T} = sprand(rng, T, m, n, 0.1)::mattype(atype)
-isdense(::SparseMVArrayType) = false
-hasinv(::SparseMVArrayType) = false
-hastypestablesolve(::SparseMVArrayType) = false
-# The sparse matrix solver only supports C types
-solveisbroken(::SparseMVArrayType) = true
+    makevec(rng::AbstractRNG, ::Type{T}, atype::SparseMVArrayType, n::Int) where {T} = sprand(rng, T, n, 0.5)::vectype(atype)
+    function makemat(rng::AbstractRNG, ::Type{T}, atype::SparseMVArrayType, m::Int, n::Int) where {T}
+        return sprand(rng, T, m, n, 0.1)::mattype(atype)
+    end
+    isdense(::SparseMVArrayType) = false
+    hasinv(::SparseMVArrayType) = false
+    hastypestablesolve(::SparseMVArrayType) = false
+    # The sparse matrix solver only supports C types
+    solveisbroken(::SparseMVArrayType) = true
+end
 
 # Sparse diagonals
 
