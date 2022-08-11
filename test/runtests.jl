@@ -159,9 +159,6 @@ const rng = Random.GLOBAL_RNG
 
     m = n = len
 
-    # Bug in Julia
-    (MT <: Bidiagonal || MT <: Tridiagonal) && n == 1 && continue
-
     a = rand(T)
     b = rand(T)
     @test a isa T
@@ -241,6 +238,12 @@ const rng = Random.GLOBAL_RNG
     test_mattype(Q)
     test_mattype(R)
     if hasinv(atype)
+        # https://github.com/JuliaLang/julia/pull/46318
+        if (MT <: Bidiagonal || MT <: Tridiagonal) && n == 1
+            @test_broken inv(Q)
+            # Skip remainder of the tests
+            continue
+        end
         invQ = inv(Q)
         invR = inv(R)
         invQR = inv(Q * R)
@@ -340,7 +343,7 @@ const rng = Random.GLOBAL_RNG
 
     if MT <: Bidiagonal || MT <: SymTridiagonal || MT <: Tridiagonal ||
        (VERSION < v"1.7" && MT <: Diagonal{T,<:SparseVector{T}} where {T})
-        @test !(kron(A, B) isa MT{T})
+        @test_broken kron(A, B) isa MT{T}
         @test kron(A, B) isa AbstractMatrix{T}
     else
         @test kron(A, B) isa MT{T}
