@@ -8,90 +8,94 @@ using Unitful
 
 ################################################################################
 
-# Correct implementation
-# [issue](https://github.com/JuliaLang/julia/issues/46307)
-Base.inv(D::Diagonal) = Diagonal(map(inv, D.diag))
+# # Correct implementation
+# # [issue](https://github.com/JuliaLang/julia/issues/46307)
+# Base.inv(D::Diagonal) = Diagonal(map(inv, D.diag))
 
-function Base.inv(D::Diagonal{T,SparseVector{T,I}}) where {T,I}
-    if length(D.diag.nzval) == D.diag.n
-        # Omit check `iszero(inv(zero(T)))`
-        return Diagonal(SparseVector(D.diag.n, D.diag.nzind, map(inv, D.diag.nzval)))
-    else
-        return Diagonal(map(inv, D.diag))
-    end
-end
+# # Correct implementation
+# # [issue](https://github.com/JuliaLang/julia/issues/46307)
+# function Base.inv(D::Diagonal{T,SparseVector{T,I}}) where {T,I}
+#     if length(D.diag.nzval) == D.diag.n
+#         # Omit check `iszero(inv(zero(T)))`
+#         return Diagonal(SparseVector(D.diag.n, D.diag.nzind, map(inv, D.diag.nzval)))
+#     else
+#         return Diagonal(map(inv, D.diag))
+#     end
+# end
 
-function Base.:/(D1::Diagonal{T1,SparseVector{T1,I1}}, D2::Diagonal{T2,SparseVector{T2,I2}}) where {T1,T2,I1,I2}
-    @assert size(D1) == size(D2)
-    z1 = zero(T1)
-    z2 = zero(T2)
-    o2 = oneunit(T2)
-    TI = promote_type(I1, I2)
-    TV = typeof(z1 / o2)
-    I = TI[]
-    V = TV[]
-    n = D1.diag.n
-    iptr1 = 1
-    iptr2 = 1
-    while iptr1 ≤ length(D1.diag.nzind) || iptr2 ≤ length(D2.diag.nzind)
-        i1 = iptr1 ≤ length(D1.diag.nzind) ? D1.diag.nzind[iptr1] : n + 1
-        i2 = iptr2 ≤ length(D2.diag.nzind) ? D2.diag.nzind[iptr2] : n + 1
-        if i1 == i2
-            i = i1
-            v = D1.diag.nzval[iptr1] / D2.diag.nzval[iptr2]
-            iptr1 += 1
-            iptr2 += 1
-        elseif i1 < i2
-            i = i1
-            throw(SingularException(i))
-            v = D1.diag.nzval[iptr1] / z2
-            iptr1 += 1
-        else
-            i = i2
-            v = z1 / D2.diag.nzval[iptr2]
-            iptr2 += 1
-        end
-        push!(I, i)
-        push!(V, v)
-    end
-    return Diagonal(sparsevec(I, V, n))
-end
+# # Correct implementation
+# # [issue](https://github.com/JuliaSparse/SparseArrays.jl/issues/223)
+# function Base.:/(D1::Diagonal{T1,SparseVector{T1,I1}}, D2::Diagonal{T2,SparseVector{T2,I2}}) where {T1,T2,I1,I2}
+#     @assert size(D1) == size(D2)
+#     z1 = zero(T1)
+#     z2 = zero(T2)
+#     o2 = oneunit(T2)
+#     TI = promote_type(I1, I2)
+#     TV = typeof(z1 / o2)
+#     I = TI[]
+#     V = TV[]
+#     n = D1.diag.n
+#     iptr1 = 1
+#     iptr2 = 1
+#     while iptr1 ≤ length(D1.diag.nzind) || iptr2 ≤ length(D2.diag.nzind)
+#         i1 = iptr1 ≤ length(D1.diag.nzind) ? D1.diag.nzind[iptr1] : n + 1
+#         i2 = iptr2 ≤ length(D2.diag.nzind) ? D2.diag.nzind[iptr2] : n + 1
+#         if i1 == i2
+#             i = i1
+#             v = D1.diag.nzval[iptr1] / D2.diag.nzval[iptr2]
+#             iptr1 += 1
+#             iptr2 += 1
+#         elseif i1 < i2
+#             i = i1
+#             throw(SingularException(i))
+#             v = D1.diag.nzval[iptr1] / z2
+#             iptr1 += 1
+#         else
+#             i = i2
+#             v = z1 / D2.diag.nzval[iptr2]
+#             iptr2 += 1
+#         end
+#         push!(I, i)
+#         push!(V, v)
+#     end
+#     return Diagonal(sparsevec(I, V, n))
+# end
 
-function Base.:\(D1::Diagonal{T1,SparseVector{T1,I1}}, D2::Diagonal{T2,SparseVector{T2,I2}}) where {T1,T2,I1,I2}
-    @assert size(D1) == size(D2)
-    z1 = zero(T1)
-    o1 = oneunit(T1)
-    z2 = zero(T2)
-    TI = promote_type(I1, I2)
-    TV = typeof(o1 \ z2)
-    I = TI[]
-    V = TV[]
-    n = D1.diag.n
-    iptr1 = 1
-    iptr2 = 1
-    while iptr1 ≤ length(D1.diag.nzind) || iptr2 ≤ length(D2.diag.nzind)
-        i1 = iptr1 ≤ length(D1.diag.nzind) ? D1.diag.nzind[iptr1] : n + 1
-        i2 = iptr2 ≤ length(D2.diag.nzind) ? D2.diag.nzind[iptr2] : n + 1
-        if i1 == i2
-            i = i1
-            v = D1.diag.nzval[iptr1] \ D2.diag.nzval[iptr2]
-            iptr1 += 1
-            iptr2 += 1
-        elseif i1 < i2
-            i = i1
-            v = D1.diag.nzval[iptr1] \ z2
-            iptr1 += 1
-        else
-            i = i2
-            throw(SingularException(i))
-            v = z1 \ D2.diag.nzval[iptr2]
-            iptr2 += 1
-        end
-        push!(I, i)
-        push!(V, v)
-    end
-    return Diagonal(sparsevec(I, V, n))
-end
+# function Base.:\(D1::Diagonal{T1,SparseVector{T1,I1}}, D2::Diagonal{T2,SparseVector{T2,I2}}) where {T1,T2,I1,I2}
+#     @assert size(D1) == size(D2)
+#     z1 = zero(T1)
+#     o1 = oneunit(T1)
+#     z2 = zero(T2)
+#     TI = promote_type(I1, I2)
+#     TV = typeof(o1 \ z2)
+#     I = TI[]
+#     V = TV[]
+#     n = D1.diag.n
+#     iptr1 = 1
+#     iptr2 = 1
+#     while iptr1 ≤ length(D1.diag.nzind) || iptr2 ≤ length(D2.diag.nzind)
+#         i1 = iptr1 ≤ length(D1.diag.nzind) ? D1.diag.nzind[iptr1] : n + 1
+#         i2 = iptr2 ≤ length(D2.diag.nzind) ? D2.diag.nzind[iptr2] : n + 1
+#         if i1 == i2
+#             i = i1
+#             v = D1.diag.nzval[iptr1] \ D2.diag.nzval[iptr2]
+#             iptr1 += 1
+#             iptr2 += 1
+#         elseif i1 < i2
+#             i = i1
+#             v = D1.diag.nzval[iptr1] \ z2
+#             iptr1 += 1
+#         else
+#             i = i2
+#             throw(SingularException(i))
+#             v = z1 \ D2.diag.nzval[iptr2]
+#             iptr2 += 1
+#         end
+#         push!(I, i)
+#         push!(V, v)
+#     end
+#     return Diagonal(sparsevec(I, V, n))
+# end
 
 ################################################################################
 
@@ -244,7 +248,13 @@ const rng = Random.GLOBAL_RNG
             # Skip remainder of the tests
             continue
         end
-        invQ = inv(Q)
+        try
+            invQ = inv(Q)
+        catch ex
+            @test_broken (inv(Q), true)
+            # Skip remainder of tests
+            continue
+        end
         invR = inv(R)
         invQR = inv(Q * R)
         if hastypestableinv(atype)

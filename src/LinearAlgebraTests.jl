@@ -198,5 +198,7 @@ function makemat(rng::AbstractRNG, ::Type{T}, atype::SparseDiagonalArrayType, m:
     return Diagonal(sprand(rng, T, n, 0.5))::mattype(atype)
 end
 isdense(::SparseDiagonalArrayType) = false
+# https://github.com/JuliaSparse/SparseArrays.jl/issues/223
+solveisbroken(::SparseDiagonalArrayType) = true
 
 end
