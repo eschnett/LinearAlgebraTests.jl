@@ -148,6 +148,7 @@ This project has identified several issues so far:
   rational matrices", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/223
 
+There are currently 10 instances of `@test_broken` in the test suite.
 
 ### Ideas
 

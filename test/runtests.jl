@@ -225,7 +225,7 @@ const rng = Random.GLOBAL_RNG
     end
     test_mattype(A + B)
     @test a * A isa MT{T}
-    if VERSION < v"1.8" && MT{T} <: Tridiagonal{T,<:SparseVector}
+    if VERSION < v"1.8-beta" && MT{T} <: Tridiagonal{T,<:SparseVector}
         @test_broken -A isa MT{T}
     else
         @test -A isa MT{T}
@@ -243,9 +243,9 @@ const rng = Random.GLOBAL_RNG
     @test (a + b) * A == a * A + b * A
     if VERSION < v"1.7" && MT{T} <: Union{Bidiagonal,Tridiagonal,SymTridiagonal}
         # https://github.com/JuliaLang/julia/issues/46321
-        A = Bidiagonal{Rational{BigInt}}([81//100, -9//100, 31//50], [71//100, 23//50],:U)
-        B = Bidiagonal{Rational{BigInt}}([-7//100, 53//100, -1//10], [-9//10, -7//20], :L)
-        C = Bidiagonal{Rational{BigInt}}([17//20, -23//25, -9//50], [-39//50,  0//1], :L)
+        A = Bidiagonal{Rational{BigInt}}([81 // 100, -9 // 100, 31 // 50], [71 // 100, 23 // 50], :U)
+        B = Bidiagonal{Rational{BigInt}}([-7 // 100, 53 // 100, -1 // 10], [-9 // 10, -7 // 20], :L)
+        C = Bidiagonal{Rational{BigInt}}([17 // 20, -23 // 25, -9 // 50], [-39 // 50, 0 // 1], :L)
         @test_broken (A * B) * C == A * (B * C)
         continue
     else
