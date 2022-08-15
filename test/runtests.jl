@@ -154,6 +154,8 @@ const rng = Random.GLOBAL_RNG
     VT = vtype.type
     MT = mtype.type
 
+    isnested(VT{T}) == isnested(MT{T}) || continue
+
     function test_vectype(x)
         @test x isa VT{T}
         # if istypestable(VT{T})
@@ -256,7 +258,12 @@ const rng = Random.GLOBAL_RNG
 
     if isdense(VT{T}) || isdense(MT{T})
         # The result might be dense
-        (A * x)::AbstractVector{T}
+        Ax = A * x
+        if eltype(Ax) <: SVector
+            Ax::AbstractVector{<:SVector{D,T} where {D}}
+        else
+            Ax::AbstractVector{T}
+        end
     else
         # The result should be sparse
         test_vectype(A * x)

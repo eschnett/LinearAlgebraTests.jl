@@ -7,7 +7,7 @@ using StaticArrays
 
 export VectorType, MatrixType
 export vectype, mattype
-export isdense, istypestable, hasinv, hastypestableinv, hastypestablesolve
+export isdense, isnested, istypestable, hasinv, hastypestableinv, hastypestablesolve
 export makevec, makemat
 export vectortypes, matrixtypes
 
@@ -22,6 +22,7 @@ struct MatrixType
 end
 
 isdense(::Type) = true
+isnested(::Type) = false
 istypestable(::Type) = true
 hasinv(::Type) = true
 hastypestableinv(::Type) = true
@@ -193,5 +194,26 @@ end
 isdense(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
 hasinv(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
 hastypestableinv(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
+
+# Nested dense/static
+
+const static_D1 = 2
+const static_D2 = 2
+
+const dense_static_vec = VectorType("dense ∘ static", Vector{SVector{static_D1,T}} where {T})
+push!(vectortypes, dense_static_vec)
+
+function makevec(rng::AbstractRNG, ::Type{dense_static_vec.type{T}}, n::Int) where {T}
+    return rand(rng, typeof(zero(SVector{static_D1,T})), n)::dense_static_vec.type{T}
+end
+isnested(::Type{<:dense_static_vec.type}) = true
+
+const dense_static_mat = MatrixType("dense ∘ static", Matrix{SMatrix{static_D1,static_D2,T,static_D1 * static_D2}} where {T})
+push!(matrixtypes, dense_static_mat)
+
+function makemat(rng::AbstractRNG, ::Type{dense_static_mat.type{T}}, m::Int, n::Int) where {T}
+    return rand(rng, typeof(zero(SMatrix{static_D1,static_D2,T})), m, n)::dense_static_mat.type{T}
+end
+isnested(::Type{<:dense_static_mat.type}) = true
 
 end

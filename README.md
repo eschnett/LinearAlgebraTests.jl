@@ -6,6 +6,9 @@ is implemented efficiently.
 * [![GitHub
   CI](https://github.com/eschnett/LinearAlgebraTests.jl/workflows/CI/badge.svg)](https://github.com/eschnett/LinearAlgebraTests.jl/actions)
 
+(There are currently 10 instances of `@test_broken` in the test
+suite.)
+
 One of the beautiful properties of Julia's linear algebra is that it
 is composable. There are many different vector and matrix
 representations (dense, diagonal, symmetry sparse, etc.), and they
@@ -147,8 +150,6 @@ This project has identified several issues so far:
 - "Error while solving linear system with Diagonal sparse complex
   rational matrices", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/223
-
-There are currently 10 instances of `@test_broken` in the test suite.
 
 ### Ideas
 
