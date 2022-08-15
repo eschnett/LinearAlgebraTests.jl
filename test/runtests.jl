@@ -3,6 +3,7 @@ using LinearAlgebraTests
 using Mods
 using Random
 using SparseArrays
+using StaticArrays
 using Test
 using Unitful
 
@@ -127,25 +128,34 @@ Base.abs(x::GaussMod) = real(x) + imag(x)
 
 ################################################################################
 
-# TODO: Unitful (and think how to check or ignore units)
+# TODO:
+# - Unitful (and think how to check or ignore units)
+# - FieldVector
+# - test rectangular matrices
 
 const mod_prime = 10000000019
 const types = [BigRat,
                Complex{BigRat},
                Mod{mod_prime,Int64},
-               GaussMod{mod_prime,Int64}]
+               GaussMod{mod_prime,Int64}
+               # typeof(zero(SMatrix{2,2,BigRat})),
+               ]
 
 Random.seed!(0)
 const rng = Random.GLOBAL_RNG
 
-@testset "Test arrays ($(atype.name){$type}[$len])" for atype in arraytypes, type in types, len in 1:5
+@testset "Test linear algebra ($(vtype.name) vector, $(mtype.name) matrix, $type[$len])" for vtype in vectortypes,
+                                                                                             mtype in matrixtypes,
+                                                                                             type in types,
+                                                                                             len in 1:5
+
     T = type
-    VT = vectype(atype)
-    MT = mattype(atype)
+    VT = vtype.type
+    MT = mtype.type
 
     function test_vectype(x)
         @test x isa VT{T}
-        # if istypestable(atype)
+        # if istypestable(VT{T})
         #     @test x isa VT{T}
         # else
         #     @test x isa AbstractVector{T}
@@ -153,7 +163,7 @@ const rng = Random.GLOBAL_RNG
         # end
     end
     function test_mattype(A)
-        if istypestable(atype)
+        if istypestable(MT{T})
             @test A isa MT{T}
         else
             @test A isa AbstractMatrix{T}
@@ -168,18 +178,18 @@ const rng = Random.GLOBAL_RNG
     @test a isa T
     @test b isa T
 
-    x = makevec(rng, T, atype, n)
-    y = makevec(rng, T, atype, n)
-    w = makevec(rng, T, atype, n)
+    x = makevec(rng, VT{T}, n)
+    y = makevec(rng, VT{T}, n)
+    w = makevec(rng, VT{T}, n)
     z = zero(x)
     test_vectype(x)
     test_vectype(y)
     test_vectype(w)
     test_vectype(z)
 
-    A = makemat(rng, T, atype, m, n)
-    B = makemat(rng, T, atype, m, n)
-    C = makemat(rng, T, atype, m, n)
+    A = makemat(rng, MT{T}, m, n)
+    B = makemat(rng, MT{T}, m, n)
+    C = makemat(rng, MT{T}, m, n)
     Z = zero(A)
     E = one(A)
     test_mattype(A)
@@ -192,6 +202,7 @@ const rng = Random.GLOBAL_RNG
     @test size(A) == (m, n)
 
     test_vectype(x + y)
+    # @test Scalar(a) .* x isa VT{T}
     @test a * x isa VT{T}
     @test -x isa VT{T}
     @test x - y isa VT{T}
@@ -206,6 +217,11 @@ const rng = Random.GLOBAL_RNG
     @test a * (x + y) == a * x + a * y
     @test (a + b) * x == a * x + b * x
 
+    # https://github.com/JuliaLang/julia/issues/46355
+    if MT{T} <: SymTridiagonal{T,<:SparseVector}
+        @test_broken A + B
+        continue
+    end
     test_mattype(A + B)
     @test a * A isa MT{T}
     @test -A isa MT{T}
@@ -224,7 +240,13 @@ const rng = Random.GLOBAL_RNG
 
     @test size(A * x) == (size(A, 1),)
 
-    test_vectype(A * x)
+    if isdense(VT{T}) || isdense(MT{T})
+        # The result might be dense
+        (A * x)::AbstractVector{T}
+    else
+        # The result should be sparse
+        test_vectype(A * x)
+    end
     @test A * z == z
     @test Z * x == z
     @test A * (x + y) == A * x + A * y
@@ -233,7 +255,7 @@ const rng = Random.GLOBAL_RNG
     @test (a * A) * x == A * (a * x)
     @test (A * B) * x == A * (B * x)
 
-    q = a + 2
+    q = a + 2 * one(a)
     invq = inv(q)
     @test invq * (q * x) == x
 
@@ -241,7 +263,7 @@ const rng = Random.GLOBAL_RNG
     R = B + 2E
     test_mattype(Q)
     test_mattype(R)
-    if hasinv(atype)
+    if hasinv(MT{T})
         # https://github.com/JuliaLang/julia/pull/46318
         if (MT <: Bidiagonal || MT <: Tridiagonal) && n == 1
             @test_broken inv(Q)
@@ -257,7 +279,7 @@ const rng = Random.GLOBAL_RNG
         end
         invR = inv(R)
         invQR = inv(Q * R)
-        if hastypestableinv(atype)
+        if hastypestableinv(MT{T})
             @test invQ isa MT{T}
             @test invR isa MT{T}
             @test invQR isa MT{T}
@@ -275,22 +297,23 @@ const rng = Random.GLOBAL_RNG
         invR = inv(Array(R))
         invQR = inv(Array(Q * R))
     end
-    if !solveisbroken(atype)
+    # https://github.com/JuliaSparse/SparseArrays.jl/issues/223
+    if MT{T} <: Diagonal{T,<:SparseVector}
+        @test_broken B / Q
+        @test_broken Q \ B
+        # Convert to a dense matrix to solve
+        BoverQ = B / Array(Q)
+        QunderB = Array(Q) \ B
+    else
         BoverQ = B / Q
         QunderB = Q \ B
-        if hastypestablesolve(atype)
+        if hastypestablesolve(MT{T})
             @test BoverQ isa MT{T}
             @test QunderB isa MT{T}
         else
             @test BoverQ isa AbstractMatrix{T}
             @test QunderB isa AbstractMatrix{T}
         end
-    else
-        @test_broken B / Q
-        @test_broken Q \ B
-        # Convert to a dense matrix to solve
-        BoverQ = B / Array(Q)
-        QunderB = Array(Q) \ B
     end
     @test invQ * Q == E
     @test Q * invQ == E
@@ -370,7 +393,7 @@ const rng = Random.GLOBAL_RNG
     @test diag(A') == conj(diag(A))
     @test diag(transpose(A)) == diag(A)
 
-    if hasinv(atype)
+    if hasinv(MT{T})
         @test invQ' == inv(Q')
         @test transpose(invQ) == inv(transpose(Q))
     else

@@ -138,6 +138,8 @@ This project has identified several issues so far:
 - "Cannot invert 1x1 tridiagonal matrices", issue
   https://github.com/JuliaLang/julia/issues/46339, pull request
   https://github.com/JuliaLang/julia/pull/46318
+- "Cannot add SymTridiagonal matrices based on sparse vectors", issue
+  https://github.com/JuliaLang/julia/issues/46355
 - "Complex rational sparse vector map incorrectly reports integer
   division error", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/221), pull
@@ -145,6 +147,7 @@ This project has identified several issues so far:
 - "Error while solving linear system with Diagonal sparse complex
   rational matrices", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/223
+
 
 ### Ideas
 
