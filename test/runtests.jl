@@ -132,6 +132,7 @@ Base.abs(x::GaussMod) = real(x) + imag(x)
 # - Unitful (and think how to check or ignore units)
 # - FieldVector
 # - test rectangular matrices
+# - test operations between different vector/matrix representations
 
 const mod_prime = 10000000019
 const types = [BigRat,
@@ -224,7 +225,11 @@ const rng = Random.GLOBAL_RNG
     end
     test_mattype(A + B)
     @test a * A isa MT{T}
-    @test -A isa MT{T}
+    if VERSION < v"1.8" && MT{T} <: Tridiagonal{T,<:SparseVector}
+        @test_broken -A isa MT{T}
+    else
+        @test -A isa MT{T}
+    end
     test_mattype(A - B)
     @test A == A
     @test A + Z == A
@@ -236,7 +241,16 @@ const rng = Random.GLOBAL_RNG
     @test (a * b) * A == a * (b * A)
     @test a * (A + B) == a * A + a * B
     @test (a + b) * A == a * A + b * A
-    @test (A * B) * C == A * (B * C)
+    if VERSION < v"1.7" && MT{T} <: Union{Bidiagonal,Tridiagonal,SymTridiagonal}
+        # https://github.com/JuliaLang/julia/issues/46321
+        A = Bidiagonal{Rational{BigInt}}([81//100, -9//100, 31//50], [71//100, 23//50],:U)
+        B = Bidiagonal{Rational{BigInt}}([-7//100, 53//100, -1//10], [-9//10, -7//20], :L)
+        C = Bidiagonal{Rational{BigInt}}([17//20, -23//25, -9//50], [-39//50,  0//1], :L)
+        @test_broken (A * B) * C == A * (B * C)
+        continue
+    else
+        @test (A * B) * C == A * (B * C)
+    end
 
     @test size(A * x) == (size(A, 1),)
 
@@ -302,9 +316,17 @@ const rng = Random.GLOBAL_RNG
         @test_broken B / Q
         @test_broken Q \ B
         # Convert to a dense matrix to solve
+        if VERSION ≤ v"1.8"
+            @test_broken BoverQ = B / Array(Q)
+            continue
+        end
         BoverQ = B / Array(Q)
         QunderB = Array(Q) \ B
     else
+        if VERSION ≤ v"1.8" && MT{T} <: Union{Bidiagonal{T},SymTridiagonal{T}}
+            @test_broken (B / Q, true)
+            continue
+        end
         BoverQ = B / Q
         QunderB = Q \ B
         if hastypestablesolve(MT{T})

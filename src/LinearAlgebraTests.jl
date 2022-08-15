@@ -120,96 +120,78 @@ end
 
 # Bidiagonal
 
-# https://github.com/JuliaLang/julia/issues/46321
-@static if VERSION ≥ v"1.7"
-    for vtype in [densevec, sparsevec]
-        Vec = vtype.type
-        bidiagmat = MatrixType("bidiagonal($(vtype.name))", Bidiagonal{T,Vec{T}} where {T})
-        push!(matrixtypes, bidiagmat)
+for vtype in [densevec, sparsevec]
+    Vec = vtype.type
+    bidiagmat = MatrixType("bidiagonal($(vtype.name))", Bidiagonal{T,Vec{T}} where {T})
+    push!(matrixtypes, bidiagmat)
 
-        @eval begin
-            function makemat(rng::AbstractRNG, ::Type{$bidiagmat.type{T}}, m::Int, n::Int) where {T}
-                return Bidiagonal(makevec(rng, $Vec{T}, n), makevec(rng, $Vec{T}, n - 1),
-                                  rand(rng, Bool) ? :U : :L)::$bidiagmat.type{T}
-            end
-            isdense(::Type{<:$bidiagmat.type}) = false
-            istypestable(::Type{<:$bidiagmat.type}) = false
-            @static if VERSION < v"1.8"
-                hasinv(::Type{<:$bidiagmat.type}) = false
-            end
-            hastypestableinv(::Type{<:$bidiagmat.type}) = false
-            hastypestablesolve(::Type{<:$bidiagmat.type}) = false
-            # @static if VERSION < v"1.8"
-            #     solveisbroken(::BidiagonalMatrixType) = true
-            # end
+    @eval begin
+        function makemat(rng::AbstractRNG, ::Type{$bidiagmat.type{T}}, m::Int, n::Int) where {T}
+            return Bidiagonal(makevec(rng, $Vec{T}, n), makevec(rng, $Vec{T}, n - 1),
+                              rand(rng, Bool) ? :U : :L)::$bidiagmat.type{T}
         end
+        isdense(::Type{<:$bidiagmat.type}) = false
+        istypestable(::Type{<:$bidiagmat.type}) = false
+        @static if VERSION < v"1.8"
+            hasinv(::Type{<:$bidiagmat.type}) = false
+        end
+        hastypestableinv(::Type{<:$bidiagmat.type}) = false
+        hastypestablesolve(::Type{<:$bidiagmat.type}) = false
     end
 end
 
 # Tridiagonal
 
-# https://github.com/JuliaLang/julia/issues/46321
-@static if VERSION ≥ v"1.7"
-    for vtype in [densevec, sparsevec]
-        Vec = vtype.type
-        tridiagmat = MatrixType("tridiagonal($(vtype.name))", Tridiagonal{T,Vec{T}} where {T})
-        push!(matrixtypes, tridiagmat)
+for vtype in [densevec, sparsevec]
+    Vec = vtype.type
+    tridiagmat = MatrixType("tridiagonal($(vtype.name))", Tridiagonal{T,Vec{T}} where {T})
+    push!(matrixtypes, tridiagmat)
 
-        @eval begin
-            function makemat(rng::AbstractRNG, ::Type{$tridiagmat.type{T}}, m::Int, n::Int) where {T}
-                return Tridiagonal(makevec(rng, $Vec{T}, n - 1), makevec(rng, $Vec{T}, n),
-                                   makevec(rng, $Vec{T}, n - 1))::$tridiagmat.type{T}
-            end
-            isdense(::Type{<:$tridiagmat.type}) = false
-            @static if VERSION < v"1.8"
-                hasinv(::Type{<:$tridiagmat.type}) = false
-            end
-            hastypestableinv(::Type{<:$tridiagmat.type}) = false
-            hastypestablesolve(::Type{<:$tridiagmat.type}) = false
+    @eval begin
+        function makemat(rng::AbstractRNG, ::Type{$tridiagmat.type{T}}, m::Int, n::Int) where {T}
+            return Tridiagonal(makevec(rng, $Vec{T}, n - 1), makevec(rng, $Vec{T}, n),
+                               makevec(rng, $Vec{T}, n - 1))::$tridiagmat.type{T}
         end
+        isdense(::Type{<:$tridiagmat.type}) = false
+        @static if VERSION < v"1.8"
+            hasinv(::Type{<:$tridiagmat.type}) = false
+        end
+        hastypestableinv(::Type{<:$tridiagmat.type}) = false
+        hastypestablesolve(::Type{<:$tridiagmat.type}) = false
     end
 end
 
 # Symmetric tridiagonal
 
-# SymTridiagonal matrices have no left-division
-@static if VERSION ≥ v"1.7"
-    for vtype in [densevec, sparsevec]
-        Vec = vtype.type
-        symtridiagmat = MatrixType("symtridiagonal($(vtype.name))", SymTridiagonal{T,Vec{T}} where {T})
-        push!(matrixtypes, symtridiagmat)
+for vtype in [densevec, sparsevec]
+    Vec = vtype.type
+    symtridiagmat = MatrixType("symtridiagonal($(vtype.name))", SymTridiagonal{T,Vec{T}} where {T})
+    push!(matrixtypes, symtridiagmat)
 
-        @eval begin
-            function makemat(rng::AbstractRNG, ::Type{$symtridiagmat.type{T}}, m::Int, n::Int) where {T}
-                return SymTridiagonal(makevec(rng, $Vec{T}, n),
-                                      makevec(rng, $Vec{T}, n - 1))::$symtridiagmat.type{T}
-            end
-            isdense(::Type{<:$symtridiagmat.type}) = false
-            @static if VERSION < v"1.8"
-                hasinv(::Type{<:$symtridiagmat.type}) = false
-            end
-            hastypestableinv(::Type{<:$symtridiagmat.type}) = false
-            hastypestablesolve(::Type{<:$symtridiagmat.type}) = false
-            # @static if VERSION < v"1.8"
-            #     solveisbroken(::SymTridiagonalMatrixType) = true
-            # end
+    @eval begin
+        function makemat(rng::AbstractRNG, ::Type{$symtridiagmat.type{T}}, m::Int, n::Int) where {T}
+            return SymTridiagonal(makevec(rng, $Vec{T}, n),
+                                  makevec(rng, $Vec{T}, n - 1))::$symtridiagmat.type{T}
         end
+        isdense(::Type{<:$symtridiagmat.type}) = false
+        @static if VERSION < v"1.8"
+            hasinv(::Type{<:$symtridiagmat.type}) = false
+        end
+        hastypestableinv(::Type{<:$symtridiagmat.type}) = false
+        hastypestablesolve(::Type{<:$symtridiagmat.type}) = false
     end
 end
 
 # Sparse
 
-# Sparse matrices have no working left-division
-@static if VERSION ≥ v"1.7"
-    const sparsemat = MatrixType("sparse", SparseMatrixCSC{T,Int} where {T})
-    push!(matrixtypes, sparsemat)
+const sparsemat = MatrixType("sparse", SparseMatrixCSC{T,Int} where {T})
+push!(matrixtypes, sparsemat)
 
-    function makemat(rng::AbstractRNG, ::Type{SparseMatrixCSC{T,Int}}, m::Int, n::Int) where {T}
-        return sprand(rng, T, m, n, 0.1)::sparsemat.type{T}
-    end
-    isdense(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
-    hasinv(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
-    hastypestableinv(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
+function makemat(rng::AbstractRNG, ::Type{SparseMatrixCSC{T,Int}}, m::Int, n::Int) where {T}
+    return sprand(rng, T, m, n, 0.1)::sparsemat.type{T}
 end
+isdense(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
+hasinv(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
+hastypestableinv(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
 
 end
