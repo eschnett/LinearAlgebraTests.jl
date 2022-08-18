@@ -133,6 +133,8 @@ Base.abs(x::GaussMod) = real(x) + imag(x)
 # - FieldVector
 # - test rectangular matrices
 # - test operations between different vector/matrix representations
+# - test `pinv`, `lu`, etc.
+# - test `map`, `reduce` (`sum`!), `broadcast`
 
 const mod_prime = 10000000019
 const types = [BigRat,

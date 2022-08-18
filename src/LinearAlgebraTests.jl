@@ -50,11 +50,13 @@ hastypestablesolve(::Type) = true
 # - SymTridiagonal
 # - Transpose
 # - Tridiagonal
+# - array views
 
 # TODO: Look at these packages
 # - FastArrays
 # - OffsetArrays
 # - jutho's
+# - FillArrays
 
 ################################################################################
 
