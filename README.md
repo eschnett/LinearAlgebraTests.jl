@@ -86,6 +86,7 @@ Vector types:
 
 - Vector
 - SparseVector
+- StaticVector
 
 Matrix types:
 
@@ -125,6 +126,12 @@ This project has identified several issues so far:
 
 ### Closed
 
+- "Cannot invert diagonal complex rational matrices", issue
+  https://github.com/JuliaLang/julia/issues/46307, pull request
+  https://github.com/JuliaLang/julia/pull/46309
+- "Cannot invert 1x1 tridiagonal matrices", issue
+  https://github.com/JuliaLang/julia/issues/46339, pull request
+  https://github.com/JuliaLang/julia/pull/46318
 - "Cannot show adjoint of sparse matrix", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/210
 
@@ -133,14 +140,8 @@ This project has identified several issues so far:
 - "map for Diagonal matrix is inefficient", issue
   https://github.com/JuliaLang/julia/issues/46292, pull request
   https://github.com/JuliaLang/julia/pull/46340
-- "Cannot invert diagonal complex rational matrices", issue
-  https://github.com/JuliaLang/julia/issues/46307, pull request
-  https://github.com/JuliaLang/julia/pull/46309
 - "Wrong matrix multiplication result with Bidiagonal matrices", issue
   https://github.com/JuliaLang/julia/issues/46321
-- "Cannot invert 1x1 tridiagonal matrices", issue
-  https://github.com/JuliaLang/julia/issues/46339, pull request
-  https://github.com/JuliaLang/julia/pull/46318
 - "Cannot add SymTridiagonal matrices based on sparse vectors", issue
   https://github.com/JuliaLang/julia/issues/46355
 - "Complex rational sparse vector map incorrectly reports integer
