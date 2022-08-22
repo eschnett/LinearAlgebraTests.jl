@@ -206,6 +206,13 @@ const rng = Random.GLOBAL_RNG
     @test size(x) == (n,)
     @test size(A) == (m, n)
 
+    @test z == z
+    @test iszero(z)
+    @test x == x
+    @test (x == z) == all(iszero, x)
+    @test iszero(x) == (x == z)
+    @test (x == y) == mapreduce(==, &, x, y)
+
     test_vectype(x + y)
     # @test Scalar(a) .* x isa VT{T}
     @test a * x isa VT{T}
@@ -221,6 +228,13 @@ const rng = Random.GLOBAL_RNG
     @test (a * b) * x == a * (b * x)
     @test a * (x + y) == a * x + a * y
     @test (a + b) * x == a * x + b * x
+
+    @test Z == Z
+    @test iszero(Z)
+    @test A == A
+    @test (A == Z) == all(iszero, A)
+    @test iszero(A) == (A == Z)
+    @test (A == B) == mapreduce(==, &, A, B)
 
     # https://github.com/JuliaLang/julia/issues/46355
     if MT{T} <: SymTridiagonal{T,<:SparseVector}
