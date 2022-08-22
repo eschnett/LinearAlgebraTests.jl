@@ -134,6 +134,10 @@ This project has identified several issues so far:
   https://github.com/JuliaLang/julia/pull/46318
 - "Cannot show adjoint of sparse matrix", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/210
+- "Complex rational sparse vector map incorrectly reports integer
+  division error", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/221), pull
+  request https://github.com/JuliaSparse/SparseArrays.jl/pull/222
 
 ### Open
 
@@ -144,13 +148,12 @@ This project has identified several issues so far:
   https://github.com/JuliaLang/julia/issues/46321
 - "Cannot add SymTridiagonal matrices based on sparse vectors", issue
   https://github.com/JuliaLang/julia/issues/46355
-- "Complex rational sparse vector map incorrectly reports integer
-  division error", issue
-  https://github.com/JuliaSparse/SparseArrays.jl/issues/221), pull
-  request https://github.com/JuliaSparse/SparseArrays.jl/pull/222
 - "Error while solving linear system with Diagonal sparse complex
   rational matrices", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/223
+- "Comparing sparse matrices to adjoints is very slow", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/226, pull
+  request https://github.com/JuliaSparse/SparseArrays.jl/pull/227
 
 ### Ideas
 
