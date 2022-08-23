@@ -151,6 +151,8 @@ This project has identified several issues so far:
   https://github.com/JuliaLang/julia/issues/46321
 - "Cannot add SymTridiagonal matrices based on sparse vectors", issue
   https://github.com/JuliaLang/julia/issues/46355
+- "kron unnecessarily converts to dense matrices", issue
+  https://github.com/JuliaLang/julia/issues/46456
 - "Error while solving linear system with Diagonal sparse complex
   rational matrices", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/223
@@ -160,6 +162,9 @@ This project has identified several issues so far:
   https://github.com/JuliaSparse/SparseArrays.jl/issues/232
 - "Sparse zero arrays compare equal when zeros are not equal", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/234
+- "kron unnecessarily returns dense matrix", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/235
+
 
 ### Ideas
 

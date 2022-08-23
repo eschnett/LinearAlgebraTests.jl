@@ -770,17 +770,24 @@ const rng = Random.GLOBAL_RNG
     # This would be nice
     # @test kron(A, B) isa Union{MT1{T},MT2{T}}
     if !isdense(A) && !isdense(B)
-        # TODO: File issue that sparse arrays with non-equal zeros compare equal
-        # TODO: File issue
-        if (MT1 <: Bidiagonal && MT2 <: Union{Bidiagonal,Diagonal,SparseMatrixCSC,SymTridiagonal,Tridiagonal}) ||
-           (MT1 <: Diagonal{<:Any,<:Vector} &&
-            MT2 <: Union{Bidiagonal{<:Any,<:Vector},
-                         SymTridiagonal{<:Any,<:Vector},
-                         Tridiagonal{<:Any,<:Vector}}) ||
-           (MT1 <: SparseMatrixCSC && MT2 <: Union{Bidiagonal,SymTridiagonal,Tridiagonal}) ||
-           (MT1 <: SymTridiagonal && MT2 <: Union{Bidiagonal,Diagonal,SparseMatrixCSC,SymTridiagonal,Tridiagonal}) ||
-           (MT1 <: Tridiagonal && MT2 <: Union{Bidiagonal,Diagonal,SparseMatrixCSC,SymTridiagonal,Tridiagonal})
-            @test_broken !isdense(kron(A, B))
+        if MT1 <: Diagonal{<:Any,<:Vector} &&
+           MT2 <: Union{Bidiagonal{<:Any,<:Vector},SymTridiagonal{<:Any,<:Vector},Tridiagonal{<:Any,<:Vector}}
+            @test MT2{T}(kron(A, B)) == kron(A, B)
+            @test_broken kron(A, B) isa MT2
+            # https://github.com/JuliaLang/julia/issues/46456
+        elseif MT1 <: Bidiagonal && (MT2 <: Diagonal || (MT2 <: Bidiagonal && B.uplo == A.uplo))
+            # https://github.com/JuliaLang/julia/issues/46456
+            if A.uplo == 'U'
+                @test UpperTriangular(kron(A, B)) == kron(A, B)
+                @test_broken kron(A, B) isa UpperTriangular
+            else
+                @test LowerTriangular(kron(A, B)) == kron(A, B)
+                @test_broken kron(A, B) isa LowerTriangular
+            end
+        elseif (MT1 <: SparseMatrixCSC && MT2 <: Union{Bidiagonal,SymTridiagonal,Tridiagonal}) ||
+               (MT1 <: Union{Bidiagonal,SymTridiagonal,Tridiagonal} && MT2 <: SparseMatrixCSC)
+            # https://github.com/JuliaSparse/SparseArrays.jl/issues/235
+            @test_broken kron(A, B) isa AbstractSparseMatrixCSC
         else
             @test !isdense(kron(A, B))
         end
