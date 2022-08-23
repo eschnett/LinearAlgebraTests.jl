@@ -7,7 +7,7 @@ using StaticArrays
 
 export VectorType, MatrixType
 export vectype, mattype
-export isdense, isnested, istypestable, hasinv, hastypestableinv, hastypestablesolve
+export isdense, isnested, istypestable, hasinv, hastypestableinv, hassolve, hastypestablesolve
 export makevec, makemat
 export vectortypes, matrixtypes
 
@@ -26,7 +26,10 @@ isnested(::Type) = false
 istypestable(::Type) = true
 hasinv(::Type) = true
 hastypestableinv(::Type) = true
+hassolve(::Type) = true
 hastypestablesolve(::Type) = true
+
+isdense(x) = isdense(typeof(x))
 
 # TODO: Add these matrix types
 # - Hermitian
@@ -193,9 +196,11 @@ push!(matrixtypes, sparsemat)
 function makemat(rng::AbstractRNG, ::Type{SparseMatrixCSC{T,Int}}, m::Int, n::Int) where {T}
     return sprand(rng, T, m, n, 0.1)::sparsemat.type{T}
 end
-isdense(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
-hasinv(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
-hastypestableinv(::Type{SparseMatrixCSC{T,Int} where {T}}) = false
+isdense(::Type{<:SparseMatrixCSC{T,Int} where {T}}) = false
+hasinv(::Type{<:SparseMatrixCSC{T,Int} where {T}}) = false
+hastypestableinv(::Type{<:SparseMatrixCSC{T,Int} where {T}}) = false
+hassolve(::Type{<:SparseMatrixCSC{T,Int} where {T}}) = false
+hastypestablesolve(::Type{<:SparseMatrixCSC{T,Int} where {T}}) = false
 
 # Nested dense/static
 

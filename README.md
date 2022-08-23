@@ -138,6 +138,9 @@ This project has identified several issues so far:
   division error", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/221), pull
   request https://github.com/JuliaSparse/SparseArrays.jl/pull/222
+- "Comparing sparse matrices to adjoints is very slow", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/226, pull
+  request https://github.com/JuliaSparse/SparseArrays.jl/pull/227
 
 ### Open
 
@@ -151,9 +154,12 @@ This project has identified several issues so far:
 - "Error while solving linear system with Diagonal sparse complex
   rational matrices", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/223
-- "Comparing sparse matrices to adjoints is very slow", issue
-  https://github.com/JuliaSparse/SparseArrays.jl/issues/226, pull
-  request https://github.com/JuliaSparse/SparseArrays.jl/pull/227
+- "iszero is very slow", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/231
+- "sparse \ sparse is dense", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/232
+- "Sparse zero arrays compare equal when zeros are not equal", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/234
 
 ### Ideas
 
