@@ -132,15 +132,17 @@ Base.abs(x::GaussMod) = real(x) + imag(x)
 # - Unitful (and think how to check or ignore units)
 # - FieldVector
 # - test rectangular matrices
-# - test operations between different vector/matrix representations
+# - test differing element types
+# - test arrays with not-one-based indexing
+# - test adjoints and transposes of matrix types
 # - test `pinv`, `lu`, etc.
 # - test `map`, `reduce` (`sum`!), `broadcast`
 
 const mod_prime = 10000000019
-const types = [BigRat,
-               Complex{BigRat},
-               Mod{mod_prime,Int64},
-               GaussMod{mod_prime,Int64}
+const types = [BigRat
+               #TODO Complex{BigRat},
+               #TODO Mod{mod_prime,Int64},
+               #TODO GaussMod{mod_prime,Int64}
                # typeof(zero(SMatrix{2,2,BigRat})),
                ]
 
@@ -496,9 +498,11 @@ const rng = Random.GLOBAL_RNG
     MT1, MT2, MT3 = map(t -> t.type, mtypes)
 
     function test_vectype(expr, x, VTs)
+        @test typeof(x)(x) == x
         @test x isa Union{VTs...}
     end
     function test_mattype(expr, A, MTs)
+        @test typeof(A)(A) == A
         if all(istypestable, MTs)
             # TODO: file issue
             # (we expect `SymTridiagonal{...,Vector}` here since there is no point in making a dense vector sparse when adding)
@@ -769,12 +773,24 @@ const rng = Random.GLOBAL_RNG
     # end
     # This would be nice
     # @test kron(A, B) isa Union{MT1{T},MT2{T}}
-    if !isdense(A) && !isdense(B)
+    if A isa Diagonal && !isdense(B)
         if MT1 <: Diagonal{<:Any,<:Vector} &&
            MT2 <: Union{Bidiagonal{<:Any,<:Vector},SymTridiagonal{<:Any,<:Vector},Tridiagonal{<:Any,<:Vector}}
             @test MT2{T}(kron(A, B)) == kron(A, B)
-            @test_broken kron(A, B) isa MT2
-            # https://github.com/JuliaLang/julia/issues/46456
+            # if MT2 <: Bidiagonal
+            #     Bidiagonal{T}(kron(A, B)) == kron(A, B)
+            # elseif MT2 <: SymTridiagonal
+            #     SymTridiagonal{T}(kron(A, B)) == kron(A, B)
+            # elseif MT2 <: Tridiagonal
+            #     Tridiagonal{T}(kron(A, B)) == kron(A, B)
+            # else
+            #     @assert false
+            # end
+            if VERSION ≤ v"1.8"
+                @test_broken kron(A, B) isa MT2
+            else
+                @test kron(A, B) isa MT2
+            end
         elseif MT1 <: Bidiagonal && (MT2 <: Diagonal || (MT2 <: Bidiagonal && B.uplo == A.uplo))
             # https://github.com/JuliaLang/julia/issues/46456
             if A.uplo == 'U'
@@ -795,7 +811,12 @@ const rng = Random.GLOBAL_RNG
     @test kron(A, B) == kron(Array(A), Array(B))
     @test kron(a * A, B) == a * kron(A, B)
     @test kron(A, a * B) == a * kron(A, B)
-    @test kron(A + B, C) == kron(A, C) + kron(B, C)
+    # https://github.com/JuliaLang/julia/issues/46355
+    if MT1 <: Diagonal{<:Any,<:SparseVector} && MT2 <: Diagonal && MT3 <: SymTridiagonal
+        @test_broken kron(A + B, C) == kron(A, C) + kron(B, C)
+    else
+        @test kron(A + B, C) == kron(A, C) + kron(B, C)
+    end
     @test kron(A, B + C) == kron(A, B) + kron(A, C)
 
     if hasinv(MT1{T})

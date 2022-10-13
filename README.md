@@ -90,12 +90,12 @@ Vector types:
 
 Matrix types:
 
-- Matrix
-- Diagonal
 - Bidiagonal
-- Tridiagonal
-- SymTridiagonal
+- Diagonal
+- Matrix
 - SparseMatrixCSC 
+- SymTridiagonal
+- Tridiagonal
 
 Some of these matrix types are flexible in their underlying vector
 types, and in some cases we test multiple vector types.
@@ -126,12 +126,23 @@ This project has identified several issues so far:
 
 ### Closed
 
+- "map for Diagonal matrix is inefficient", issue
+  https://github.com/JuliaLang/julia/issues/46292, pull request
+  https://github.com/JuliaLang/julia/pull/46340
 - "Cannot invert diagonal complex rational matrices", issue
   https://github.com/JuliaLang/julia/issues/46307, pull request
   https://github.com/JuliaLang/julia/pull/46309
 - "Cannot invert 1x1 tridiagonal matrices", issue
   https://github.com/JuliaLang/julia/issues/46339, pull request
   https://github.com/JuliaLang/julia/pull/46318
+- "kron unnecessarily converts to dense matrices", issue
+  https://github.com/JuliaLang/julia/issues/46456, partial pull
+  request https://github.com/JuliaLang/julia/pull/46463
+- "Missing Bidiagonal constructor", issue
+  https://github.com/JuliaLang/julia/issues/46556
+- "kron of Diagonal and Bidiagonal calls missing method", issue
+  https://github.com/JuliaLang/julia/issues/46654, pull request
+  https://github.com/JuliaLang/julia/pull/46672
 - "Cannot show adjoint of sparse matrix", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/210
 - "Complex rational sparse vector map incorrectly reports integer
@@ -141,30 +152,27 @@ This project has identified several issues so far:
 - "Comparing sparse matrices to adjoints is very slow", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/226, pull
   request https://github.com/JuliaSparse/SparseArrays.jl/pull/227
+- "iszero is very slow", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/231
+- "kron unnecessarily returns dense matrix", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/235, pull
+  request https://github.com/JuliaSparse/SparseArrays.jl/pull/236
+- "sum of a sparse array is slow", issue
+  https://github.com/JuliaSparse/SparseArrays.jl/issues/237
 
 ### Open
 
-- "map for Diagonal matrix is inefficient", issue
-  https://github.com/JuliaLang/julia/issues/46292, pull request
-  https://github.com/JuliaLang/julia/pull/46340
 - "Wrong matrix multiplication result with Bidiagonal matrices", issue
   https://github.com/JuliaLang/julia/issues/46321
 - "Cannot add SymTridiagonal matrices based on sparse vectors", issue
   https://github.com/JuliaLang/julia/issues/46355
-- "kron unnecessarily converts to dense matrices", issue
-  https://github.com/JuliaLang/julia/issues/46456
 - "Error while solving linear system with Diagonal sparse complex
   rational matrices", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/223
-- "iszero is very slow", issue
-  https://github.com/JuliaSparse/SparseArrays.jl/issues/231
 - "sparse \ sparse is dense", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/232
 - "Sparse zero arrays compare equal when zeros are not equal", issue
   https://github.com/JuliaSparse/SparseArrays.jl/issues/234
-- "kron unnecessarily returns dense matrix", issue
-  https://github.com/JuliaSparse/SparseArrays.jl/issues/235
-
 
 ### Ideas
 

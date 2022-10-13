@@ -60,6 +60,9 @@ isdense(x) = isdense(typeof(x))
 # - OffsetArrays
 # - jutho's
 # - FillArrays
+# - [PartitionedArrays](https://github.com/fverdugo/PartitionedArrays.jl)
+# - SparseMatricesCSR
+# - BandedMatrices
 
 ################################################################################
 
